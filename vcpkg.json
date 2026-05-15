@@ -1,0 +1,23 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "tagforge",
+    "version-string": "1.0.0",
+    "description": "A modern C++23 NBT library for Minecraft (Java + Bedrock), with reader, writer, zero-copy view, SNBT, gzip/zlib, region files, and strict Modified-UTF-8.",
+    "license": "MIT",
+    "builtin-baseline": "d46283cf33cf5de7bd88e12156ce03882be1f179",
+    "dependencies": [
+        "libdeflate",
+        "lz4",
+        {
+            "name": "catch2",
+            "host": false
+        },
+        "cli11"
+    ],
+    "features": {
+        "benchmarks": {
+            "description": "In-repo self-benchmarks (Google Benchmark).",
+            "dependencies": ["benchmark"]
+        }
+    }
+}

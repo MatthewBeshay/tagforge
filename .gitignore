@@ -1,0 +1,21 @@
+# Exclude everything
+/*
+
+# Except for default project files
+!/.github
+!/benchmarks
+!/cmake
+!/include
+!/src
+!/tests
+!/tools
+!/.clang-format
+!/.editorconfig
+!/.gitattributes
+!/.gitignore
+!/CMakeLists.txt
+!/CMakePresets.json
+!/LICENSE
+!/README.md
+!/vcpkg-configuration.json
+!/vcpkg.json

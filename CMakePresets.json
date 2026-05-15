@@ -1,0 +1,100 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 4,
+        "minor": 0,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "windows-base",
+            "hidden": true,
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "TAGFORGE_BUILD_TESTING": "ON",
+                "TAGFORGE_BUILD_CLI": "ON"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "msvc",
+            "displayName": "MSVC (cl)",
+            "inherits": "windows-base",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl",
+                "CMAKE_CXX_COMPILER": "cl"
+            }
+        },
+        {
+            "name": "msvc-asan",
+            "displayName": "MSVC (cl) + AddressSanitizer",
+            "inherits": "msvc",
+            "cacheVariables": {
+                "TAGFORGE_ENABLE_ASAN": "ON"
+            }
+        },
+        {
+            "name": "vs2026",
+            "displayName": "Visual Studio 2026 (sln + projects)",
+            "generator": "Visual Studio 18 2026",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "architecture": { "value": "x64", "strategy": "set" },
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "TAGFORGE_BUILD_TESTING": "ON",
+                "TAGFORGE_BUILD_CLI": "ON"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "vs2022",
+            "displayName": "Visual Studio 2022 (sln + projects)",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "architecture": { "value": "x64", "strategy": "set" },
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "TAGFORGE_BUILD_TESTING": "ON",
+                "TAGFORGE_BUILD_CLI": "ON"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "msvc-debug",            "configurePreset": "msvc",          "configuration": "Debug" },
+        { "name": "msvc-release",          "configurePreset": "msvc",          "configuration": "Release" },
+        { "name": "msvc-relwithdebinfo",   "configurePreset": "msvc",          "configuration": "RelWithDebInfo" },
+        { "name": "msvc-asan-debug",       "configurePreset": "msvc-asan",     "configuration": "Debug" }
+    ],
+    "testPresets": [
+        {
+            "name": "msvc",
+            "configurePreset": "msvc",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": false }
+        },
+        {
+            "name": "msvc-asan",
+            "configurePreset": "msvc-asan",
+            "output": { "outputOnFailure": true },
+            "execution": { "noTestsAction": "error", "stopOnFailure": false }
+        }
+    ]
+}

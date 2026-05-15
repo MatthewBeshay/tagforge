@@ -1,0 +1,81 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.preset }} / ${{ matrix.config }}
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { preset: msvc,          build: msvc-release,        config: Release }
+          - { preset: msvc-asan,     build: msvc-asan-debug,     config: Debug }
+
+    env:
+      VCPKG_BINARY_SOURCES: "clear;default,readwrite"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgGitCommitId: d46283cf33cf5de7bd88e12156ce03882be1f179
+
+      - name: Configure
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.build }}
+
+      - name: Test
+        run: ctest --preset ${{ matrix.preset }} -C ${{ matrix.config }} --output-on-failure
+
+      - name: nbt-cli verify (Release only)
+        if: matrix.config == 'Release' && !endsWith(matrix.preset, '-asan')
+        run: |
+          $cli = "build/${{ matrix.preset }}/tools/nbt-cli/${{ matrix.config }}/nbt-cli.exe"
+          if (Test-Path $cli) {
+            & $cli verify --format java tests/fixtures/java/bigtest_raw.nbt
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+        shell: pwsh
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format-18
+      - name: Check formatting
+        run: |
+          set -euo pipefail
+          files=$(git ls-files '*.cpp' '*.hpp' '*.h' '*.c')
+          if [ -n "$files" ]; then
+            clang-format-18 --dry-run -Werror $files
+          fi
